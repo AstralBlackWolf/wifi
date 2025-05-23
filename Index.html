@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Mensajes de Amor con Música y Animación de Texto</title>
 <style>
+  /* Igual que antes... */
   * {
     box-sizing: border-box;
   }
@@ -110,11 +111,11 @@
     <button id="nextBtn" aria-label="Siguiente mensaje">Siguiente →</button>
   </div>
   <div class="buttons">
-    <button id="toggleMusic" aria-label="Reproducir o pausar música">Pausar música</button>
+    <button id="toggleMusic" aria-label="Reproducir o pausar música">Reproducir música</button>
   </div>
 </div>
 
-<audio id="musica" src="https://cdn.pixabay.com/download/audio/2022/02/14/audio_d89f79b74c.mp3?filename=romantic-background-music-11023.mp3" loop autoplay></audio>
+<audio id="musica" src="https://cdn.pixabay.com/download/audio/2022/02/14/audio_d89f79b74c.mp3?filename=romantic-background-music-11023.mp3" loop></audio>
 
 <script>
   const mensajes = [
@@ -197,15 +198,18 @@
   // Botón música
   toggleMusic.addEventListener('click', () => {
     if (musica.paused) {
-      musica.play();
-      toggleMusic.textContent = "Pausar música";
+      musica.play().then(() => {
+        toggleMusic.textContent = "Pausar música";
+      }).catch(() => {
+        alert("No se pudo reproducir la música automáticamente. Por favor, permite la reproducción.");
+      });
     } else {
       musica.pause();
       toggleMusic.textContent = "Reproducir música";
     }
   });
 
-  // Iniciar con mensaje y música
+  // Iniciar con mensaje, sin música automática
   mostrarMensaje(indice);
   let intervalo = setInterval(avanzarMensaje, 7000);
 </script>
