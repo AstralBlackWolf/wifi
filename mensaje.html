@@ -2,10 +2,9 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Mensajes de Amor con Música y Animación de Texto</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Mensajes de Amor con Animación de Texto</title>
 <style>
-  /* Igual que antes... */
   * {
     box-sizing: border-box;
   }
@@ -13,88 +12,103 @@
     height: 100%;
     margin: 0;
     font-family: 'Arial', sans-serif;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     background-size: cover;
     background-position: center;
     transition: background-image 1s ease-in-out;
     color: white;
     position: relative;
+    overflow-y: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   .overlay {
-    position: absolute;
+    position: fixed;
     top:0; left:0; right:0; bottom:0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.55);
     z-index: 1;
   }
   .message-box {
     position: relative;
     z-index: 2;
-    background: rgba(0, 0, 0, 0.4);
-    padding: 40px 60px 140px 60px;
-    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.5);
     max-width: 600px;
+    margin: 5% auto 40px auto;
+    border-radius: 15px;
+    padding: 30px 40px 80px 40px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.75);
     text-align: center;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
     user-select: none;
   }
   h1 {
     font-size: 3rem;
     margin-bottom: 25px;
     letter-spacing: 3px;
-    text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+    text-shadow: 2px 2px 7px rgba(0,0,0,0.8);
   }
   p {
     font-size: 1.8rem;
     font-style: italic;
     line-height: 1.4;
     min-height: 130px;
-    text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+    text-shadow: 1px 1px 5px rgba(0,0,0,0.7);
     margin-bottom: 40px;
     white-space: pre-wrap;
   }
   .buttons {
     display: flex;
     justify-content: center;
-    gap: 20px;
-    margin-bottom: 20px;
+    gap: 25px;
+    flex-wrap: wrap;
+    margin-bottom: 15px;
   }
   button {
     background: rgba(255,255,255,0.25);
     border: none;
-    padding: 12px 25px;
-    font-size: 1.2rem;
+    padding: 15px 35px;
+    font-size: 1.3rem;
     color: white;
     border-radius: 50px;
     cursor: pointer;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.4);
     transition: background 0.3s ease;
     user-select: none;
     letter-spacing: 1px;
+    flex: 1 1 120px;
+    max-width: 180px;
+    min-width: 120px;
+    touch-action: manipulation;
   }
-  button:hover {
-    background: rgba(255,255,255,0.45);
+  button:hover, button:focus {
+    background: rgba(255,255,255,0.5);
+    outline: none;
   }
   button:active {
     transform: scale(0.95);
   }
+
+  /* Móviles */
   @media (max-width: 640px) {
     .message-box {
-      padding: 20px 30px 120px 30px;
+      padding: 20px 25px 80px 25px;
+      margin: 7% auto 40px auto;
     }
     h1 {
-      font-size: 2rem;
+      font-size: 2.2rem;
+      margin-bottom: 20px;
     }
     p {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
       min-height: 100px;
       margin-bottom: 30px;
     }
     button {
-      font-size: 1rem;
-      padding: 10px 20px;
+      font-size: 1.1rem;
+      padding: 14px 20px;
+      max-width: none;
+      flex: 1 1 100%;
+    }
+    .buttons {
+      gap: 15px;
     }
   }
 </style>
@@ -110,12 +124,7 @@
     <button id="prevBtn" aria-label="Mensaje anterior">← Anterior</button>
     <button id="nextBtn" aria-label="Siguiente mensaje">Siguiente →</button>
   </div>
-  <div class="buttons">
-    <button id="toggleMusic" aria-label="Reproducir o pausar música">Reproducir música</button>
-  </div>
 </div>
-
-<audio id="musica" src="https://cdn.pixabay.com/download/audio/2022/02/14/audio_d89f79b74c.mp3?filename=romantic-background-music-11023.mp3" loop></audio>
 
 <script>
   const mensajes = [
@@ -148,8 +157,6 @@
   const mensajeElemento = document.getElementById('mensaje');
   const prevBtn = document.getElementById('prevBtn');
   const nextBtn = document.getElementById('nextBtn');
-  const musica = document.getElementById('musica');
-  const toggleMusic = document.getElementById('toggleMusic');
   let typingTimeout;
 
   function typeWriter(text, i = 0) {
@@ -185,31 +192,16 @@
     intervalo = setInterval(avanzarMensaje, 7000);
   }
 
-  // Botones mensajes
   prevBtn.addEventListener('click', () => {
     retrocederMensaje();
     reiniciarIntervalo();
   });
+
   nextBtn.addEventListener('click', () => {
     avanzarMensaje();
     reiniciarIntervalo();
   });
 
-  // Botón música
-  toggleMusic.addEventListener('click', () => {
-    if (musica.paused) {
-      musica.play().then(() => {
-        toggleMusic.textContent = "Pausar música";
-      }).catch(() => {
-        alert("No se pudo reproducir la música automáticamente. Por favor, permite la reproducción.");
-      });
-    } else {
-      musica.pause();
-      toggleMusic.textContent = "Reproducir música";
-    }
-  });
-
-  // Iniciar con mensaje, sin música automática
   mostrarMensaje(indice);
   let intervalo = setInterval(avanzarMensaje, 7000);
 </script>
