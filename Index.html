@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mensajes de Amor con Música y Animación de Texto</title>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body, html {
+    height: 100%;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 1s ease-in-out;
+    color: white;
+    position: relative;
+  }
+  .overlay {
+    position: absolute;
+    top:0; left:0; right:0; bottom:0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1;
+  }
+  .message-box {
+    position: relative;
+    z-index: 2;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 40px 60px 100px 60px;
+    border-radius: 15px;
+    max-width: 600px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+    user-select: none;
+  }
+  h1 {
+    font-size: 3rem;
+    margin-bottom: 25px;
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 5px rgba(0,0,0,0.7);
+  }
+  p {
+    font-size: 1.8rem;
+    font-style: italic;
+    line-height: 1.4;
+    min-height: 130px;
+    text-shadow: 1px 1px 4px rgba(0,0,0,0.6);
+    margin-bottom: 40px;
+    white-space: pre-wrap;
+  }
+  .buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+  }
+  button {
+    background: rgba(255,255,255,0.25);
+    border: none;
+    padding: 12px 25px;
+    font-size: 1.2rem;
+    color: white;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: background 0.3s ease;
+    user-select: none;
+    letter-spacing: 1px;
+  }
+  button:hover {
+    background: rgba(255,255,255,0.45);
+  }
+  button:active {
+    transform: scale(0.95);
+  }
+  @media (max-width: 640px) {
+    .message-box {
+      padding: 20px 30px 90px 30px;
+    }
+    h1 {
+      font-size: 2rem;
+    }
+    p {
+      font-size: 1.2rem;
+      min-height: 100px;
+      margin-bottom: 30px;
+    }
+    button {
+      font-size: 1rem;
+      padding: 10px 20px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="overlay"></div>
+
+<div class="message-box" role="main" aria-label="Mensajes de amor">
+  <h1>Mensajes de Amor</h1>
+  <p id="mensaje" aria-live="polite"></p>
+  <div class="buttons">
+    <button id="prevBtn" aria-label="Mensaje anterior">← Anterior</button>
+    <button id="nextBtn" aria-label="Siguiente mensaje">Siguiente →</button>
+  </div>
+</div>
+
+<audio id="musica" src="https://cdn.pixabay.com/download/audio/2022/02/14/audio_d89f79b74c.mp3?filename=romantic-background-music-11023.mp3" loop autoplay></audio>
+
+<script>
+  const mensajes = [
+    "Eres la razón por la que sonrío todos los días.",
+    "Contigo, cada momento es un sueño hecho realidad.",
+    "Amarte es la aventura más hermosa de mi vida.",
+    "Tu amor ilumina hasta mis días más oscuros.",
+    "Juntos somos invencibles y eternos.",
+    "Eres mi hogar, mi paz y mi alegría.",
+    "En cada latido, mi corazón susurra tu nombre.",
+    "Gracias por ser mi razón para creer en el amor.",
+    "Eres mi sol en días nublados, mi estrella en la noche.",
+    "Contigo aprendí que el verdadero amor sí existe."
+  ];
+
+  const fondos = [
+    'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1518609878373-06d740f60d8b?auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1494526585095-c41746248156?auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1465188035480-9e6f1e7c9e16?auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1469594292607-9a6410f65c30?auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1470770841072-f978cf4d019e?auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?auto=format&fit=crop&w=1350&q=80',
+    'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?auto=format&fit=crop&w=1350&q=80'
+  ];
+
+  let indice = 0;
+  const mensajeElemento = document.getElementById('mensaje');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  let intervalo;
+  let typingTimeout;
+
+  function typeWriter(text, i = 0) {
+    if (i < text.length) {
+      mensajeElemento.textContent += text.charAt(i);
+      typingTimeout = setTimeout(() => typeWriter(text, i + 1), 50);
+    }
+  }
+
+  function mostrarMensaje(i) {
+    clearTimeout(typingTimeout);
+    mensajeElemento.style.opacity = 0;
+    setTimeout(() => {
+      mensajeElemento.textContent = "";
+      document.body.style.backgroundImage = `url(${fondos[i]})`;
+      mensajeElemento.style.opacity = 1;
+      typeWriter(mensajes[i]);
+    }, 400);
+  }
+
+  function avanzarMensaje() {
+    indice = (indice + 1) % mensajes.length;
+    mostrarMensaje(indice);
+  }
+
+  function retrocederMensaje() {
+    indice = (indice - 1 + mensajes.length) % mensajes.length;
+    mostrarMensaje(indice);
+  }
+
+  function reiniciarIntervalo() {
+    clearInterval(intervalo);
+    intervalo = setInterval(avanzarMensaje, 7000);
+  }
+
+  // Botones
+  prevBtn.addEventListener('click', () => {
+    retrocederMensaje();
+    reiniciarIntervalo();
+  });
+  nextBtn.addEventListener('click', () => {
+    avanzarMensaje();
+    reiniciarIntervalo();
+  });
+
+  // Iniciar
+  mostrarMensaje(indice);
+  intervalo = setInterval(avanzarMensaje, 7000);
+</script>
+
+</body>
+</html>
